@@ -65,7 +65,7 @@ def main():
         st.stop()
     
     # Fetch data
-    df = fetch_sensor_data()
+    df = fetch_sensor_data(client)
     
     if df.empty:
         st.warning("No data available. Please ensure:")
