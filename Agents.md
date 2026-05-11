@@ -1,0 +1,1 @@
+rule 1: ALways answer in arabic
