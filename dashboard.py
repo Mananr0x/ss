@@ -4,6 +4,7 @@ import plotly.express as px
 from google.cloud import bigquery
 from streamlit_autorefresh import st_autorefresh
 import os
+import glob
 
 # --- Configuration ---
 st.set_page_config(
@@ -22,15 +23,16 @@ DATASET_ID = "sand_data"
 TABLE_ID = "reading"
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-SERVICE_ACCOUNT_FILE = os.path.join(BASE_DIR, "service-account-key.json")
+json_files = glob.glob(os.path.join(BASE_DIR, "smart-sand-project-*.json"))
 
-if not os.path.exists(SERVICE_ACCOUNT_FILE):
+if not json_files:
     st.error(
-        f"ملف الاعتماد غير موجود: {SERVICE_ACCOUNT_FILE}\n"
+        f"ملف الاعتماد غير موجود في {BASE_DIR}\n"
         f"نزل ملف Service Account Key (JSON) من Google Cloud Console وحطه في نفس المجلد."
     )
     st.stop()
 
+SERVICE_ACCOUNT_FILE = json_files[0]
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = SERVICE_ACCOUNT_FILE
 
 def init_bigquery_client():

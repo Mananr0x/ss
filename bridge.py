@@ -1,6 +1,7 @@
 import serial
 import time
 import os
+import glob
 from google.cloud import bigquery
 from google.oauth2 import service_account
 
@@ -12,7 +13,15 @@ DATASET_ID = 'sand_data'
 TABLE_ID = 'reading'
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-SERVICE_ACCOUNT_FILE = os.path.join(BASE_DIR, "service-account-key.json")
+json_files = glob.glob(os.path.join(BASE_DIR, "smart-sand-project-*.json"))
+
+if not json_files:
+    raise FileNotFoundError(
+        f"Service account key not found in {BASE_DIR}\n"
+        f"Download the JSON key from Google Cloud Console and place it in the same folder."
+    )
+
+SERVICE_ACCOUNT_FILE = json_files[0]
 
 def initialize_bigquery_client():
     """Initialize and return a BigQuery client using service account credentials."""
