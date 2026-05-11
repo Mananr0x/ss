@@ -2,9 +2,16 @@ import os
 import time
 from google.cloud import bigquery
 
-# 1. تحديد ملف المفتاح (تأكدي أن الاسم يطابق ملف الـ JSON في مجلدك)
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "smart-sand-project-461f3ddf3a45.json"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+SERVICE_ACCOUNT_FILE = os.path.join(BASE_DIR, "service-account-key.json")
 
+if not os.path.exists(SERVICE_ACCOUNT_FILE):
+    raise FileNotFoundError(
+        f"ملف الاعتماد غير موجود: {SERVICE_ACCOUNT_FILE}\n"
+        f"نزل ملف Service Account Key (JSON) من Google Cloud Console وحطه في نفس المجلد."
+    )
+
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = SERVICE_ACCOUNT_FILE
 client = bigquery.Client()
 
 # 2. هنا أهم خطوة: حطي الـ Table ID حقك من جوجل كلاود

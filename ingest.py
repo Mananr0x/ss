@@ -4,8 +4,16 @@ import json
 from google.cloud import bigquery
 import serial  # pip install pyserial
 
-# Set up Google Cloud credentials
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "smart-sand-project-461f3ddf3a45.json"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+SERVICE_ACCOUNT_FILE = os.path.join(BASE_DIR, "service-account-key.json")
+
+if not os.path.exists(SERVICE_ACCOUNT_FILE):
+    raise FileNotFoundError(
+        f"Service account key not found: {SERVICE_ACCOUNT_FILE}\n"
+        f"Download the JSON key from Google Cloud Console and place it in the same folder."
+    )
+
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = SERVICE_ACCOUNT_FILE
 
 # Initialize BigQuery client
 client = bigquery.Client()

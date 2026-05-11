@@ -10,9 +10,9 @@ BAUD_RATE = 9600
 PROJECT_ID = 'smart-sand-project'
 DATASET_ID = 'sand_data'
 TABLE_ID = 'reading'
-# Path to your Google Cloud service account key file
-# Set this variable to the path of your JSON key file
-SERVICE_ACCOUNT_FILE = 'path/to/your/service-account-key.json'  # <-- UPDATE THIS
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+SERVICE_ACCOUNT_FILE = os.path.join(BASE_DIR, "service-account-key.json")
 
 def initialize_bigquery_client():
     """Initialize and return a BigQuery client using service account credentials."""

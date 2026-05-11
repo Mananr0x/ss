@@ -17,41 +17,41 @@ st.set_page_config(
 count = st_autorefresh(interval=2000, limit=None, key="datarefresh")
 
 # --- BigQuery Setup ---
-# Ensure GOOGLE_APPLICATION_CREDENTIALS environment variable is set
-# Example: export GOOGLE_APPLICATION_CREDENTIALS="path/to/key.json"
 PROJECT_ID = "smart-sand-project"
 DATASET_ID = "sand_data"
 TABLE_ID = "reading"
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+SERVICE_ACCOUNT_FILE = os.path.join(BASE_DIR, "service-account-key.json")
+
+if not os.path.exists(SERVICE_ACCOUNT_FILE):
+    st.error(
+        f"ملف الاعتماد غير موجود: {SERVICE_ACCOUNT_FILE}\n"
+        f"نزل ملف Service Account Key (JSON) من Google Cloud Console وحطه في نفس المجلد."
+    )
+    st.stop()
+
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = SERVICE_ACCOUNT_FILE
+
 def init_bigquery_client():
     """Initialize BigQuery client."""
     try:
-        client = bigquery.Client()
+        client = bigquery.Client(project=PROJECT_ID)
         return client
     except Exception as e:
         st.error(f"Failed to initialize BigQuery client: {e}")
         return None
 
-def fetch_sensor_data(_=None):
-    """Fetch latest sensor readings using the `bq` CLI command."""
-    import subprocess, json
+def fetch_sensor_data(client):
+    """Fetch latest sensor readings from BigQuery."""
     query = f"SELECT temperature, voltage, timestamp FROM `{PROJECT_ID}.{DATASET_ID}.{TABLE_ID}` ORDER BY timestamp DESC LIMIT 100"
-    cmd = ["bq", "query", "--use_legacy_sql=false", "--format=json", query]
     try:
-        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
-        rows = json.loads(result.stdout)
-        if not rows:
-            return pd.DataFrame()
-        df = pd.DataFrame(rows)
-        # Convert timestamp (assumed seconds) to datetime for plotting
-        if 'timestamp' in df.columns:
+        df = client.query(query).to_dataframe()
+        if not df.empty and 'timestamp' in df.columns:
             df['event_time'] = pd.to_datetime(df['timestamp'], unit='s')
         return df
-    except subprocess.CalledProcessError as e:
-        st.error(f"bq command failed: {e.stderr}")
-        return pd.DataFrame()
     except Exception as e:
-        st.error(f"Error fetching data via bq CLI: {e}")
+        st.error(f"Error fetching data from BigQuery: {e}")
         return pd.DataFrame()
 
 # --- Main Dashboard ---
